@@ -1,0 +1,51 @@
+/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: theme('colors.amtfar.background');
+  color: #334155; /* Slate 700 */
+}
+
+/* Base card styling */
+@layer components {
+  .amtfar-card {
+    @apply bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300;
+  }
+  
+  .amtfar-btn-primary {
+    @apply bg-amtfar-primary text-white font-medium py-2 px-4 rounded-lg 
+           hover:bg-amtfar-primary_dark active:scale-95 transition-all duration-200 shadow-sm
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+  
+  .amtfar-btn-secondary {
+    @apply bg-white text-slate-700 border border-slate-300 font-medium py-2 px-4 rounded-lg 
+           hover:bg-slate-50 active:scale-95 transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+  
+  .amtfar-input {
+    @apply w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amtfar-secondary 
+           focus:border-amtfar-secondary outline-none transition-all duration-200;
+  }
+}
+
+/* Skeleton Loading Animation */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.skeleton {
+  @apply bg-slate-200 rounded;
+  background-image: linear-gradient(90deg, #e2e8f0 0px, #f1f5f9 40px, #e2e8f0 80px);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
