@@ -16,7 +16,8 @@
         "respect/validation": "^2.2",
         "illuminate/database": "^11.0",
         "illuminate/events": "^11.0",
-        "firebase/php-jwt": "^7.0"
+        "firebase/php-jwt": "^7.0",
+        "geekcom/phpjasper": "^3.4"
     },
     "autoload": {
         "psr-4": {

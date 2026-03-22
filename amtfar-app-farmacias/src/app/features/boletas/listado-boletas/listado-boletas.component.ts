@@ -67,4 +67,31 @@ export class ListadoBoletasComponent implements OnInit {
   pagarBoleta(id: number) {
     Swal.fire('Próximamente', 'Integración con botón de pago.', 'info');
   }
+
+  descargarBoletaPdf(id: number) {
+    Swal.fire({
+      title: 'Generando PDF',
+      text: 'Por favor espere...',
+      allowOutsideClick: false,
+      didOpen: () => { Swal.showLoading(); }
+    });
+
+    this.boletaService.descargarBoletaPdf(id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `boleta_${id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        Swal.close();
+      },
+      error: (err) => {
+        console.error(err);
+        Swal.fire('Error', 'No se pudo generar el reporte. Verifique que la plantilla Jasper esté configurada.', 'error');
+      }
+    });
+  }
 }

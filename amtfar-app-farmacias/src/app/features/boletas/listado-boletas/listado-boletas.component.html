@@ -58,7 +58,7 @@
                 </a>
                 
                 <!-- Botones si ya está Generada (>=1) -->
-                <button *ngIf="boleta.estado > 0" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" title="Descargar PDF">
+                <button *ngIf="boleta.estado > 0" (click)="descargarBoletaPdf(boleta.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" title="Descargar PDF">
                   <i class="fas fa-file-pdf"></i>
                 </button>
                 <button *ngIf="boleta.estado === 1" (click)="pagarBoleta(boleta.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 hover:bg-emerald-200 transition-colors" title="Pagar Ahora">

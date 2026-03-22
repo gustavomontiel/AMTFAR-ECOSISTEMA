@@ -41,6 +41,7 @@ return function (App $app) {
             $boletaGroup->get('', \App\Action\Boleta\ListarBoletasAction::class);
             $boletaGroup->get('/ultima', \App\Action\Boleta\GetUltimaBoletaAction::class);
             $boletaGroup->get('/{id:[0-9]+}', \App\Action\Boleta\GetBoletaAction::class);
+            $boletaGroup->get('/{id:[0-9]+}/pdf', \App\Action\Boleta\DescargarBoletaPdfAction::class);
             $boletaGroup->post('', \App\Action\Boleta\CrearBoletaAction::class);
             $boletaGroup->post('/calcular', \App\Action\Boleta\CalcularBoletaAction::class);
         })->add(\App\Middleware\JwtAuthMiddleware::class);

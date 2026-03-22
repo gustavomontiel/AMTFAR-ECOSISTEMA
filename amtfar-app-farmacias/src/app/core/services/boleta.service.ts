@@ -27,7 +27,14 @@ export class BoletaService {
   }
 
   getBoleta(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/boletas/${id}`, { headers: this.getHeaders() });
+    return this.http.get(`http://127.0.0.1:8888/api/v1/boletas/${id}`, { headers: this.getHeaders() });
+  }
+
+  descargarBoletaPdf(id: number): Observable<Blob> {
+    return this.http.get(`http://127.0.0.1:8888/api/v1/boletas/${id}/pdf`, {
+      headers: this.getHeaders(),
+      responseType: 'blob'
+    });
   }
 
   calcularBoleta(payload: any): Observable<any> {
@@ -44,5 +51,9 @@ export class BoletaService {
 
   getCategorias(): Observable<any> {
     return this.http.get<any>(`http://127.0.0.1:8888/api/v1/maestros/categorias`, { headers: this.getHeaders() });
+  }
+
+  getEmpleadosActivos(): Observable<any> {
+    return this.http.get<any>(`http://127.0.0.1:8888/api/v1/empleados`, { headers: this.getHeaders() });
   }
 }

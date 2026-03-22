@@ -119,13 +119,20 @@ class CrearBoletaAction
                     throw new \Exception("Boleta en borrador no encontrada o ya fue generada.");
                 }
                 
-                $boleta->update([
+                $updateData = [
                     'imponible_declarado' => $totalRemunerativo,
                     'imponible_calculado' => $totalRemunerativo,
                     'total_deposito' => round($totalAPagar, 2),
                     'estado' => $estado,
                     'draft_payload' => $isDraft ? json_encode($empleadosPayload) : null
-                ]);
+                ];
+                
+                if (!$isDraft) {
+                    $updateData['fecha_vto'] = date('Y-m-d', strtotime('+15 days'));
+                    $updateData['fecha_boleta'] = date('Y-m-d'); // Corremos 15 días exactos e instanciamos la fecha actual de finalización
+                }
+                
+                $boleta->update($updateData);
                 
                 if (!$isDraft) {
                     // Clear old relations to replace with new valid ones
@@ -136,7 +143,7 @@ class CrearBoletaAction
                 $boleta = Boleta::create([
                     'farmacia_id' => $id_farmacia,
                     'periodo_id' => $periodo->id,
-                    'fecha_vto' => date('Y-m-d', strtotime('+15 days')),
+                    'fecha_vto' => $isDraft ? date('Y-m-d', strtotime('+30 days')) : date('Y-m-d', strtotime('+15 days')),
                     'fecha_boleta' => date('Y-m-d'),
                     'imponible_declarado' => $totalRemunerativo,
                     'imponible_calculado' => $totalRemunerativo,

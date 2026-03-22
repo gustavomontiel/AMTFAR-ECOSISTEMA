@@ -58,7 +58,7 @@ export class GenerarBoletaComponent implements OnInit {
         this.boletaId = +id;
         this.cargarBoletaBorrador(this.boletaId);
       } else {
-        this.cargarUltimaBoleta();
+        this.cargarEmpleadosActivos();
       }
     });
   }
@@ -85,12 +85,24 @@ export class GenerarBoletaComponent implements OnInit {
     });
   }
 
-  cargarUltimaBoleta() {
+  cargarEmpleadosActivos() {
     this.isLoading = true;
-    this.boletaService.getUltimaBoleta().subscribe({
+    this.boletaService.getEmpleadosActivos().subscribe({
       next: (res) => {
         if (res.status === 'success') {
-          this.empleados = res.data.empleados || [];
+          // Filtrar solo los empleados activos (estado_baja == 0)
+          const activos = (res.data || []).filter((e: any) => e.estado_baja === 0);
+          
+          this.empleados = activos.map((e: any) => ({
+            cuil: e.cuil,
+            nombre: e.nombre,
+            categoria_id: e.categoria_id,
+            fecha_ingreso: e.fecha_ingreso || '',
+            fecha_egreso: e.fecha_egreso || '',
+            importe_remunerativo: e.importe_remunerativo || null,
+            importe_no_remunerativo: e.importe_no_remunerativo || null
+          }));
+
           if (this.empleados.length > 0) {
               this.recalcular();
           }
@@ -99,7 +111,7 @@ export class GenerarBoletaComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error cargando empleados', err);
+        console.error('Error cargando empleados activos', err);
         this.isLoading = false;
         this.cdr.detectChanges();
       }
@@ -175,9 +187,9 @@ export class GenerarBoletaComponent implements OnInit {
     return true;
   }
 
-  isValidCuil(cuil: string | null | undefined): boolean {
+  isValidCuil(cuil: any): boolean {
     if (!cuil) return false;
-    let strCuit = cuil.replace(/[-\s_]/g, '');
+    let strCuit = String(cuil).replace(/[-\s_]/g, '');
     if (strCuit.length !== 11 || !/^\d+$/.test(strCuit)) return false;
 
     const multiplicadores = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
