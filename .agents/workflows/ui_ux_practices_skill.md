@@ -42,3 +42,8 @@ Aunque el Backoffice pueda usarse mayormente en desktop, la App Farmacias puede 
 ## 6. Lenguaje, Copywriting y Simplicidad
 *   Evitar jerga técnica en la UI. En vez de "Error 500 conectando a SQL", decir "Tuvimos un inconveniente al conectar con nuestros servidores. Por favor, reintente en unos minutos."
 *   Los botones deben indicar la acción exacta que ocurrirá: En vez de usar un botón que diga "OK" al borrar, debe decir "Sí, Eliminar".
+
+## 7. UX Proactiva y Sanitización Defensiva
+- **Actuar sin pedir permiso para mejorar la UX:** Si un input puede ser mejorado (ej. forzar solo números en un CUIL, autocompletar guiones, poner máscaras de fecha), el asistente debe implementarlo asertivamente como parte de la "calidad premium" esperada, sin necesidad de consultar previamente si se debería hacer.
+- **Micro-interacciones defensivas:** Los botones de "Guardar" deben reaccionar al estado de carga deshabilitándose al instante (`disabled=true`) al hacer clic para prevenir cuellos de botella y doble-envíos.
+- **Validación Resiliente & Silenciosa:** Eliminar instantáneamente caracteres inválidos del input mientras el usuario escribe o pega texto (ej: `replace(/[^0-9]/g, '')` en el binding de Angular) en lugar de arrojar molestos y estresantes mensajes de error rojos post-tecleo. Que el sistema trabaje para el usuario, no al revés.

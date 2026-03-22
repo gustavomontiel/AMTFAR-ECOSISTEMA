@@ -1,0 +1,75 @@
+<div class="px-8 py-8 h-full bg-slate-50 overflow-y-auto">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h2 class="text-3xl font-black text-slate-800 tracking-tight">Mis Boletas</h2>
+      <p class="text-slate-500 mt-1">Historial de declaraciones y estado de pagos</p>
+    </div>
+    <a routerLink="/app/boletas/generar" class="amtfar-btn-primary px-5 py-2.5 rounded-xl shadow-lg hover:-translate-y-0.5 transition-all text-sm font-bold flex items-center gap-2">
+      <i class="fas fa-plus"></i> Nueva Boleta
+    </a>
+  </div>
+
+  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-amtfar-primary"></div>
+  </div>
+
+  <div *ngIf="!isLoading && boletas.length === 0" class="bg-white rounded-3xl p-12 text-center shadow-sm border border-slate-100">
+    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+      <i class="fas fa-file-invoice text-3xl text-slate-300"></i>
+    </div>
+    <h3 class="text-xl font-bold text-slate-700 mb-2">No tienes boletas generadas</h3>
+    <p class="text-slate-500 max-w-md mx-auto mb-6">Aún no has generado ninguna boleta sindical en esta farmacia. Comienza creando tu primera liquidación.</p>
+    <a routerLink="/app/boletas/generar" class="amtfar-btn-primary inline-flex items-center px-6 py-2.5 rounded-xl font-medium shadow-md hover:shadow-lg transition-all">
+      Comenzar ahora
+    </a>
+  </div>
+
+  <div *ngIf="!isLoading && boletas.length > 0" class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-slate-50 border-b border-slate-100">
+          <tr>
+            <th class="py-4 px-6 font-semibold text-slate-600 text-sm tracking-wide">ID/Nro</th>
+            <th class="py-4 px-6 font-semibold text-slate-600 text-sm tracking-wide">Período</th>
+            <th class="py-4 px-6 font-semibold text-slate-600 text-sm tracking-wide">Fecha Creación</th>
+            <th class="py-4 px-6 font-semibold text-slate-600 text-sm tracking-wide">Total A Pagar</th>
+            <th class="py-4 px-6 font-semibold text-slate-600 text-sm tracking-wide text-center">Estado</th>
+            <th class="py-4 px-6 font-semibold text-slate-500 text-sm text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+          <tr *ngFor="let boleta of boletas" class="hover:bg-slate-50/50 transition-colors group">
+            <td class="py-4 px-6 font-medium text-slate-700">#{{ boleta.id | number:'4.0' }}</td>
+            <td class="py-4 px-6 text-slate-600 font-medium">{{ boleta.periodo_id }}</td>
+            <td class="py-4 px-6 text-slate-500 text-sm">{{ boleta.fecha_boleta | date:'dd/MM/yyyy' }}</td>
+            <td class="py-4 px-6 font-bold text-slate-800">$ {{ boleta.total_deposito | number:'1.2-2' }}</td>
+            <td class="py-4 px-6 text-center">
+              <span class="px-3 py-1 rounded-full text-xs font-bold border" [ngClass]="getStatusBadge(boleta.estado).class">
+                {{ getStatusBadge(boleta.estado).label }}
+              </span>
+            </td>
+            <td class="py-4 px-6 text-right">
+              
+              <div class="flex justify-end gap-2">
+                <!-- Botón Continuar si es Borrador -->
+                <a *ngIf="boleta.estado === 0" [routerLink]="['/app/boletas/editar', boleta.id]" 
+                   class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amtfar-secondary/20 text-amtfar-primary hover:bg-amtfar-secondary transition-colors" title="Continuar Edición">
+                  <i class="fas fa-edit"></i>
+                </a>
+                
+                <!-- Botones si ya está Generada (>=1) -->
+                <button *ngIf="boleta.estado > 0" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" title="Descargar PDF">
+                  <i class="fas fa-file-pdf"></i>
+                </button>
+                <button *ngIf="boleta.estado === 1" (click)="pagarBoleta(boleta.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 hover:bg-emerald-200 transition-colors" title="Pagar Ahora">
+                  <i class="fas fa-credit-card"></i>
+                </button>
+              </div>
+
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

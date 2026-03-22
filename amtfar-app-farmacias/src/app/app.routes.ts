@@ -21,6 +21,18 @@ export const routes: Routes = [
         loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
+        path: 'boletas',
+        loadComponent: () => import('./features/boletas/listado-boletas/listado-boletas.component').then(m => m.ListadoBoletasComponent)
+      },
+      {
+        path: 'boletas/generar',
+        loadComponent: () => import('./features/boletas/generar-boleta/generar-boleta.component').then(m => m.GenerarBoletaComponent)
+      },
+      {
+        path: 'boletas/editar/:id',
+        loadComponent: () => import('./features/boletas/generar-boleta/generar-boleta.component').then(m => m.GenerarBoletaComponent)
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'

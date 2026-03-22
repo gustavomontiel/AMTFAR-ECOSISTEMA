@@ -16,7 +16,7 @@ export class DashboardComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
-    this.http.get<any>('http://127.0.0.1:8080/api/v1/empleados').subscribe({
+    this.http.get<any>('http://127.0.0.1:8888/api/v1/empleados').subscribe({
       next: (res) => {
         if (res.status === 'success') {
           this.empleados = res.data;

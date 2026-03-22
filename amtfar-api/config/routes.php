@@ -5,18 +5,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 return function (App $app) {
-    // Definición de CORS para aceptar peticiones del Frontend Angular (preflight)
-    $app->options('/{routes:.+}', function ($request, $response, $args) {
-        return $response;
-    });
-
-    $app->add(function ($request, $handler) {
-        $response = $handler->handle($request);
-        return $response
-                ->withHeader('Access-Control-Allow-Origin', '*')
-                ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
-                ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    });
+    // CORS middleware is globally registered in index.php
 
     // Rutas Base API
     $app->get('/', function (Request $request, Response $response) {
@@ -46,6 +35,22 @@ return function (App $app) {
         // ----------------------------------------------------
         $group->group('/empleados', function ($empleadosGroup) {
             $empleadosGroup->get('', \App\Action\Empleado\ListEmpleadosAction::class);
+        })->add(\App\Middleware\JwtAuthMiddleware::class);
+
+        $group->group('/boletas', function ($boletaGroup) {
+            $boletaGroup->get('', \App\Action\Boleta\ListarBoletasAction::class);
+            $boletaGroup->get('/ultima', \App\Action\Boleta\GetUltimaBoletaAction::class);
+            $boletaGroup->get('/{id:[0-9]+}', \App\Action\Boleta\GetBoletaAction::class);
+            $boletaGroup->post('', \App\Action\Boleta\CrearBoletaAction::class);
+            $boletaGroup->post('/calcular', \App\Action\Boleta\CalcularBoletaAction::class);
+        })->add(\App\Middleware\JwtAuthMiddleware::class);
+
+        $group->group('/maestros', function ($maestrosGroup) {
+            $maestrosGroup->get('/categorias', \App\Action\Maestro\ListarCategoriasAction::class);
+        })->add(\App\Middleware\JwtAuthMiddleware::class);
+
+        $group->group('/personas', function ($personaGroup) {
+            $personaGroup->get('/{cuil}', \App\Action\Persona\GetPersonaByCuilAction::class);
         })->add(\App\Middleware\JwtAuthMiddleware::class);
 
     });

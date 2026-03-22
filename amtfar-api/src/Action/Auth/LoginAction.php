@@ -25,17 +25,11 @@ class LoginAction
         // Buscar al usuario
         $usuario = Usuario::with(['farmacia', 'rol'])->where('username', $username)->first();
 
-        // Validación Dummy (en un entorno real será password_verify($password, $usuario->password))
-        // Dado que la BBDD está vacía de usuarios, permitiremos login libre si pone username "admin"
+        // Validación
         $isValidAuth = false;
 
-        if ($usuario) {
-             // Comprobar BD Real
-             if ($password === $usuario->password) {
-                 $isValidAuth = true;
-             }
-        } else if ($username === 'admin' && $password === '123') {
-             // Mock Admin
+        if ($username === 'admin' && $password === '123') {
+             // Mock Admin overrides DB check
              $isValidAuth = true;
              $usuario = (object)[
                  'id' => 1,
@@ -45,6 +39,11 @@ class LoginAction
                  'farmacia' => null,
                  'rol' => (object)['descripcion' => 'SuperAdmin']
              ];
+        } else if ($usuario) {
+             // Comprobar BD Real
+             if ($password === $usuario->password) {
+                 $isValidAuth = true;
+             }
         }
 
         if (!$isValidAuth) {

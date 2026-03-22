@@ -1,0 +1,211 @@
+<div class="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
+  <!-- Area Principal: Formulario de Empleados -->
+  <div class="flex-1 space-y-6">
+    <header class="mb-4">
+      <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Generar Nueva Boleta</h2>
+      <p class="text-slate-500 mt-1">Revise y edite la nómina de empleados para calcular los aportes correspondientes.</p>
+    </header>
+
+    <div class="amtfar-card p-6 border-t-4 border-t-amtfar-primary">
+      <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-4">
+          <label class="font-semibold text-slate-700">Período Fiscal:</label>
+          <input type="text" [(ngModel)]="periodoActual" class="border border-slate-300 rounded-lg px-3 py-2 w-32 focus:ring-amtfar-primary focus:border-amtfar-primary outline-none">
+        </div>
+        
+        <button (click)="agregarEmpleado()" 
+                [disabled]="empleados.length > 0 && !esFormularioValido()"
+                title="Complete correctamente los datos del empleado actual antes de añadir uno nuevo"
+                class="amtfar-btn-secondary text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+            <path fill-rule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clip-rule="evenodd" />
+          </svg>
+          Añadir Empleado
+        </button>
+      </div>
+
+      <!-- Loading Skeleton -->
+      <div *ngIf="isLoading" class="space-y-4">
+        <div class="skeleton h-12 w-full rounded"></div>
+        <div class="skeleton h-12 w-full rounded"></div>
+        <div class="skeleton h-12 w-full rounded"></div>
+      </div>
+
+      <!-- Lista Interactiva de Empleados -->
+      <div *ngIf="!isLoading" class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-slate-600">
+          <thead class="bg-slate-50 text-slate-800 font-semibold border-b border-slate-200 uppercase text-xs">
+            <tr>
+              <th class="px-3 py-3 rounded-tl-lg">CUIL</th>
+              <th class="px-3 py-3">Nombre Apellido</th>
+              <th class="px-3 py-3">Categoría</th>
+              <th class="px-3 py-3">Ingreso / Egreso</th>
+              <th class="px-3 py-3 text-right">Imp. Rem. ($)</th>
+              <th class="px-3 py-3 text-right">Imp. No Rem. ($)</th>
+              <th class="px-3 py-3 rounded-tr-lg text-center">Acción</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+          <tr *ngFor="let empleado of empleadosPaginados; let i = index" class="hover:bg-slate-50/50 transition-colors">
+            
+            <td class="p-3">
+              <input type="text" [ngModel]="empleado.cuil" (ngModelChange)="onCuilChange(empleado, $event)" (blur)="buscarDatosPorCuil(empleado)" (keyup.enter)="buscarDatosPorCuil(empleado)"
+                     placeholder="Sólo números"
+                     inputmode="numeric"
+                     maxlength="11"
+                     class="w-[120px] rounded-lg border-slate-200 focus:border-amtfar-primary focus:ring-amtfar-primary text-sm shadow-sm"
+                     [ngClass]="{'border-red-400 focus:ring-red-400 bg-red-50': empleado.cuil && !isValidCuil(empleado.cuil), 'border-red-300': !empleado.cuil}">
+              <div *ngIf="empleado.cuil && !isValidCuil(empleado.cuil)" class="text-[10px] text-red-500 mt-1 absolute font-medium">Inválido</div>
+            </td>
+              <td class="px-3 py-2">
+                <input type="text" [(ngModel)]="empleado.nombre" class="w-full min-w-[150px] p-1 border border-slate-200 rounded text-sm focus:ring-1 focus:ring-amtfar-primary outline-none" placeholder="Nombre completo">
+              </td>
+              <td class="px-3 py-2">
+                <div class="flex flex-col relative w-full min-w-[130px]">
+                  <select [(ngModel)]="empleado.categoria_id" (ngModelChange)="recalcular()"
+                          class="w-full p-1 border rounded text-xs focus:ring-1 focus:ring-amtfar-primary outline-none shadow-sm bg-white"
+                          [ngClass]="{'border-red-400 bg-red-50': !empleado.categoria_id, 'border-slate-200 text-slate-700': empleado.categoria_id}">
+                    <option [ngValue]="null" disabled selected>Seleccione...</option>
+                    <option *ngFor="let cat of categorias" [ngValue]="cat.id">{{ cat.descripcion || cat.nombre }}</option>
+                  </select>
+                  <span *ngIf="!empleado.categoria_id" class="text-[10px] text-red-500 font-medium absolute -bottom-[0.8rem]">Requerido</span>
+                </div>
+              </td>
+              <td class="px-3 py-2 flex flex-col gap-3 relative">
+                <div class="relative w-32 h-[26px]">
+                  <input type="text" [value]="formatDateForDisplay(empleado.fecha_ingreso)" readonly
+                         class="absolute inset-0 w-full h-full px-2 py-1 border border-slate-200 rounded text-xs text-slate-700 shadow-sm outline-none pointer-events-none bg-white"
+                         [ngClass]="{'border-red-400 bg-red-50': empleado.fecha_ingreso && !isFechaIngresoValida(empleado.fecha_ingreso), 'border-red-300': !empleado.fecha_ingreso}"
+                         placeholder="dd/mm/aaaa (Ingreso)">
+                  <input type="date" [(ngModel)]="empleado.fecha_ingreso" (ngModelChange)="recalcular()"
+                         class="amtfar-date-overlay"
+                         title="Fecha de Ingreso">
+                  <span *ngIf="empleado.fecha_ingreso && !isFechaIngresoValida(empleado.fecha_ingreso)" class="text-[10px] text-red-500 font-medium absolute -bottom-4 whitespace-nowrap">Sup. al período</span>
+                </div>
+                <div class="relative w-32 h-[26px]">
+                  <input type="text" [value]="formatDateForDisplay(empleado.fecha_egreso)" readonly
+                         class="absolute inset-0 w-full h-full px-2 py-1 border border-slate-200 rounded text-xs text-slate-500 shadow-sm outline-none pointer-events-none bg-slate-50"
+                         [ngClass]="{'border-red-400 bg-red-50 opacity-100 text-slate-700': empleado.fecha_egreso && !isFechaEgresoValida(empleado.fecha_ingreso, empleado.fecha_egreso)}"
+                         placeholder="dd/mm/aaaa (Egreso)">
+                  <input type="date" [(ngModel)]="empleado.fecha_egreso" (ngModelChange)="recalcular()"
+                         class="amtfar-date-overlay"
+                         title="Fecha de Egreso">
+                  <span *ngIf="empleado.fecha_egreso && !isFechaEgresoValida(empleado.fecha_ingreso, empleado.fecha_egreso)" class="text-[10px] text-red-500 font-medium absolute -bottom-4 whitespace-nowrap">Incoherente</span>
+                </div>
+              </td>
+              <td class="px-3 py-2 text-right align-top">
+                <div class="flex flex-col items-end">
+                  <input type="number" min="0.01" [(ngModel)]="empleado.importe_remunerativo" (ngModelChange)="recalcular()" 
+                         class="w-24 p-1 border rounded text-sm text-right focus:ring-1 focus:ring-amtfar-primary outline-none shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                         [ngClass]="{'border-red-400 bg-red-50 focus:ring-red-400': !empleado.importe_remunerativo || empleado.importe_remunerativo <= 0, 'border-slate-200': empleado.importe_remunerativo > 0}"
+                         placeholder="Obligatorio">
+                  <span *ngIf="!empleado.importe_remunerativo || empleado.importe_remunerativo <= 0" class="text-[10px] text-red-500 font-medium mt-1 tracking-tight">Debe ser > 0</span>
+                </div>
+              </td>
+              <td class="px-3 py-2 text-right align-top">
+                <div class="flex flex-col items-end">
+                  <input type="number" min="0" [(ngModel)]="empleado.importe_no_remunerativo" (ngModelChange)="recalcular()" 
+                         class="w-24 p-1 border rounded text-sm text-right focus:ring-1 focus:ring-amtfar-primary outline-none shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                         [ngClass]="{'border-red-400 bg-red-50 focus:ring-red-400': empleado.importe_no_remunerativo < 0, 'border-slate-200': empleado.importe_no_remunerativo >= 0 || empleado.importe_no_remunerativo === null}"
+                         placeholder="0.00">
+                  <span *ngIf="empleado.importe_no_remunerativo < 0" class="text-[10px] text-red-500 font-medium mt-1 tracking-tight">Menor a cero</span>
+                </div>
+              </td>
+              <td class="p-3 w-16 text-center">
+              <button (click)="eliminarEmpleado( (paginaActual - 1) * empleadosPorPagina + i )" title="Quitar Empleado"
+                      class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- Paginador Virtual Local -->
+      <div *ngIf="empleados.length > empleadosPorPagina" class="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+        <button (click)="cambiarPagina(-1)" [disabled]="paginaActual === 1" 
+                class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-medium hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition-all">
+          <i class="fas fa-chevron-left mr-1"></i> Anterior
+        </button>
+        <div class="text-sm font-medium text-slate-500">
+          Página <span class="bg-white px-2 py-0.5 rounded-md border border-slate-200 text-slate-700 shadow-sm mx-1">{{ paginaActual }}</span> de {{ totalPaginas }} 
+          <span class="ml-2 text-xs">({{ empleados.length }} empleados)</span>
+        </div>
+        <button (click)="cambiarPagina(1)" [disabled]="paginaActual === totalPaginas" 
+                class="px-4 py-2 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-medium hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition-all">
+          Siguiente <i class="fas fa-chevron-right ml-1"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Area Lateral: Resumen de Boleta -->
+  <aside class="w-full lg:w-80 space-y-4 relative">
+    <div class="amtfar-card p-6 sticky top-24 border-t-4 border-t-amtfar-secondary">
+      <h3 class="font-bold text-lg text-slate-800 mb-4 flex justify-between items-center">
+        Resumen
+        <svg *ngIf="isCalculating" class="animate-spin h-5 w-5 text-amtfar-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </h3>
+
+      <div *ngIf="resumen" class="space-y-4">
+        
+        <div class="flex justify-between text-sm text-slate-600">
+          <span>Empleados computados:</span>
+          <span class="font-semibold">{{ resumen.resumen_empleados }}</span>
+        </div>
+        
+        <div class="flex justify-between text-sm text-slate-600 border-b border-slate-100 pb-2">
+          <span>Total Remunerativo:</span>
+          <span class="font-semibold text-slate-800">$ {{ resumen.total_remunerativo | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="space-y-2 pt-2">
+            <h4 class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Detalle de Conceptos</h4>
+            <div *ngFor="let concepto of resumen.conceptos_detallados" class="flex justify-between items-center text-sm py-1">
+              <span class="text-slate-600 truncate mr-2" [title]="concepto.descripcion">{{ concepto.descripcion }} <span *ngIf="concepto.porcentaje>0" class="text-xs text-slate-400">({{concepto.porcentaje}}%)</span></span>
+              <span class="font-medium text-slate-800">$ {{ concepto.importe_calculado | number:'1.2-2' }}</span>
+            </div>
+        </div>
+
+        <div class="mt-6 pt-4 border-t-2 border-slate-200">
+          <div *ngIf="boletaId" class="mb-4 bg-blue-50/80 rounded-lg p-3 text-center border border-blue-100">
+            <span class="text-xs font-bold text-blue-600 uppercase tracking-wide"><i class="fas fa-edit mr-1"></i> Modo Edición</span>
+            <p class="text-sm text-blue-800 font-medium">Retomando Boleta #{{ boletaId | number:'4.0' }}</p>
+          </div>
+
+          <div class="flex justify-between items-center mb-6">
+            <span class="font-bold text-slate-700">Total a Pagar</span>
+            <span class="text-2xl font-black text-amtfar-primary">$ {{ resumen?.total_a_pagar ? (resumen.total_a_pagar | number:'1.2-2') : '0.00' }}</span>
+          </div>
+          
+          <div *ngIf="!esFormularioValido()" class="mb-3 text-xs text-red-500 font-medium text-center">
+            Verifique tener CUILs y FECHAS válidas, importes Remunerativos mayores a cero (>0) y campos obligatorios rellenados.
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 mt-4">
+            <button (click)="generarBoleta(true)" [disabled]="isSaving || isCalculating" 
+                    title="Guardar progreso sin generar la obligación de pago"
+                    class="w-full bg-slate-100 text-slate-700 hover:bg-slate-200 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-slate-200 flex items-center justify-center gap-2">
+              <i class="fas fa-save"></i> Borrador
+            </button>
+            <button (click)="generarBoleta(false)" [disabled]="!esFormularioValido() || isSaving || isCalculating" 
+                    title="Cerrar la declaración y generar comprobante firme"
+                    class="w-full amtfar-btn-primary py-3 rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+              <span *ngIf="!isSaving"><i class="fas fa-check-circle"></i> Finalizar</span>
+              <span *ngIf="isSaving">Procesando...</span>
+            </button>
+          </div>
+          
+        </div>
+
+      </div>
+
+      <div *ngIf="!resumen && !isCalculating" class="text-center py-8 text-sm text-slate-400">
+        Añade empleados para ver el resumen de los subtotales a abonar.
+      </div>
+    </div>
+  </aside>
+</div>
