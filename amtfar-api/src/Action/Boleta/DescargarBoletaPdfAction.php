@@ -42,20 +42,21 @@ class DescargarBoletaPdfAction
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
+        $dbConfig = [
+            'driver' => 'mysql',
+            'username' => 'root',        // Ajustar variables de entorno en Prod
+            'host' => '127.0.0.1',
+            'database' => 'amtfar',
+            'port' => '3306'
+        ];
+        
         $options = [
             'format' => ['pdf'],
             'params' => [
                 'IdBoleta' => $idBoleta,
                 'IdFarmacia' => $idFarmacia
             ],
-            'db_connection' => [
-                'driver' => 'mysql',
-                'username' => 'root',        // Ajustar variables de entorno en Prod
-                'password' => '',
-                'host' => '127.0.0.1',
-                'database' => 'amtfar',
-                'port' => '3306'
-            ]
+            'db_connection' => $dbConfig
         ];
 
         try {

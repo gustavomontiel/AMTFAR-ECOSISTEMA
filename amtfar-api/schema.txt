@@ -1,0 +1,1 @@
+id, razon_social, nombre_fantasia, cuit, direccion, telefono, localidad_id, estado_baja
