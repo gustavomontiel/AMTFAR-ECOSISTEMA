@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { BehaviorSubject, tap } from 'rxjs';
+import { tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +13,8 @@ export class AuthService {
   // En producción usar environment config
   private apiUrl = 'http://localhost:8080/api'; 
   
-  private permisosSubject = new BehaviorSubject<string[]>([]);
-  public permisos$ = this.permisosSubject.asObservable();
+  private permisosSignal = signal<string[]>([]);
+  public permisos = this.permisosSignal.asReadonly();
 
   constructor() {
     this.loadTokenData();
@@ -28,7 +28,7 @@ export class AuthService {
           localStorage.setItem('token', res.data.token);
           if (res.data.user.permisos) {
              localStorage.setItem('permisos', JSON.stringify(res.data.user.permisos));
-             this.permisosSubject.next(res.data.user.permisos);
+             this.permisosSignal.set(res.data.user.permisos);
           }
         }
       })
@@ -38,21 +38,21 @@ export class AuthService {
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('permisos');
-    this.permisosSubject.next([]);
+    this.permisosSignal.set([]);
     this.router.navigate(['/login']);
   }
 
   hasPermission(permiso: string): boolean {
-    return this.permisosSubject.value.includes(permiso);
+    return this.permisosSignal().includes(permiso);
   }
 
   private loadTokenData() {
     const permStr = localStorage.getItem('permisos');
     if (permStr) {
       try {
-        this.permisosSubject.next(JSON.parse(permStr));
+        this.permisosSignal.set(JSON.parse(permStr));
       } catch (e) {
-        this.permisosSubject.next([]);
+        this.permisosSignal.set([]);
       }
     }
   }

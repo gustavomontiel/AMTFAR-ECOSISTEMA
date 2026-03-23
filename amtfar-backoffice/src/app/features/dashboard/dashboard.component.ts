@@ -17,15 +17,17 @@ import { AuthService } from '../../core/auth/auth.service';
         <nav class="flex-1 p-4 space-y-2">
           <a routerLink="/dashboard" class="block py-2 px-4 rounded hover:bg-slate-50 text-slate-700">Inicio</a>
           
-          <a *ngIf="authService.hasPermission('gestionar_usuarios')" 
-             routerLink="/usuarios" class="block py-2 px-4 rounded hover:bg-slate-50 text-slate-700">
+          @if (authService.hasPermission('gestionar_usuarios')) {
+          <a routerLink="/usuarios" class="block py-2 px-4 rounded hover:bg-slate-50 text-slate-700">
             Gestionar Usuarios
           </a>
+          }
           
-          <a *ngIf="authService.hasPermission('ver_reportes')" 
-             routerLink="/reportes" class="block py-2 px-4 rounded hover:bg-slate-50 text-slate-700">
+          @if (authService.hasPermission('ver_reportes')) {
+          <a routerLink="/reportes" class="block py-2 px-4 rounded hover:bg-slate-50 text-slate-700">
             Reportes
           </a>
+          }
         </nav>
         <div class="p-4 border-t">
           <button (click)="authService.logout()" class="w-full text-left text-red-600 hover:text-red-800 px-4 py-2">
