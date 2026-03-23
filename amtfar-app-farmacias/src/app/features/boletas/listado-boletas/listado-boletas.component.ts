@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { BoletaService } from '../../../core/services/boleta.service';
@@ -12,8 +12,8 @@ import Swal from 'sweetalert2';
   styleUrls: ['./listado-boletas.component.scss']
 })
 export class ListadoBoletasComponent implements OnInit {
-  boletas: any[] = [];
-  isLoading = true;
+  boletas = signal<any[]>([]);
+  isLoading = signal(true);
 
   constructor(
     private boletaService: BoletaService,
@@ -25,31 +25,28 @@ export class ListadoBoletasComponent implements OnInit {
   }
 
   cargarBoletas() {
-    this.isLoading = true;
-    this.cdr.detectChanges();
+    this.isLoading.set(true);
     
     this.boletaService.getBoletas().subscribe({
       next: (res) => {
         try {
           if (res && res.data && Array.isArray(res.data)) {
-            this.boletas = res.data;
+            this.boletas.set(res.data);
           } else {
-            this.boletas = [];
+            this.boletas.set([]);
           }
         } catch (e) {
           console.error('Error procesando respuesta:', e);
-          this.boletas = [];
+          this.boletas.set([]);
         } finally {
-          this.isLoading = false;
-          this.cdr.detectChanges();
+          this.isLoading.set(false);
         }
       },
       error: (err) => {
         console.error('API Error:', err);
         Swal.fire('Error', 'No se pudo cargar el listado de boletas.', 'error');
-        this.isLoading = false;
-        this.boletas = [];
-        this.cdr.detectChanges();
+        this.isLoading.set(false);
+        this.boletas.set([]);
       }
     });
   }

@@ -46,6 +46,13 @@ return function (App $app) {
             $boletaGroup->post('/calcular', \App\Action\Boleta\CalcularBoletaAction::class);
         })->add(\App\Middleware\JwtAuthMiddleware::class);
 
+        $group->group('/farmacias', function ($farmaciasGroup) {
+            $farmaciasGroup->get('', \App\Action\Farmacia\ListarFarmaciasAction::class);
+            $farmaciasGroup->post('', \App\Action\Farmacia\CrearFarmaciaAction::class);
+            $farmaciasGroup->put('/{id:[0-9]+}', \App\Action\Farmacia\ActualizarFarmaciaAction::class);
+            $farmaciasGroup->put('/{id:[0-9]+}/baja', \App\Action\Farmacia\BajaFarmaciaAction::class);
+        })->add(\App\Middleware\JwtAuthMiddleware::class);
+
         $group->group('/maestros', function ($maestrosGroup) {
             $maestrosGroup->get('/categorias', \App\Action\Maestro\ListarCategoriasAction::class);
         })->add(\App\Middleware\JwtAuthMiddleware::class);

@@ -1,0 +1,54 @@
+<div class="fixed inset-0 bg-slate-800 bg-opacity-75 flex justify-center items-center z-50 p-4">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-bold text-slate-800">
+        @if (isEdit) {
+          Editar Farmacia
+        } @else {
+          Nueva Farmacia
+        }
+      </h3>
+      <button (click)="cancelado.emit()" class="text-slate-500 hover:text-slate-800 text-2xl leading-none">&times;</button>
+    </div>
+
+    <form (ngSubmit)="guardar()" #f="ngForm">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Razón Social *</label>
+          <input type="text" name="razon_social" [(ngModel)]="formData.razon_social" required class="w-full border border-slate-300 rounded p-2 focus:ring focus:ring-amtfar-primary focus:border-amtfar-primary outline-none">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Nombre de Fantasía</label>
+          <input type="text" name="nombre_fantasia" [(ngModel)]="formData.nombre_fantasia" class="w-full border border-slate-300 rounded p-2 focus:ring focus:ring-amtfar-primary focus:border-amtfar-primary outline-none">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">CUIT *</label>
+          <input type="text" name="cuit" [(ngModel)]="formData.cuit" required class="w-full border border-slate-300 rounded p-2 focus:ring focus:ring-amtfar-primary focus:border-amtfar-primary outline-none">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Dirección</label>
+          <input type="text" name="direccion" [(ngModel)]="formData.direccion" class="w-full border border-slate-300 rounded p-2 focus:ring focus:ring-amtfar-primary focus:border-amtfar-primary outline-none">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Teléfono</label>
+          <input type="text" name="telefono" [(ngModel)]="formData.telefono" class="w-full border border-slate-300 rounded p-2 focus:ring focus:ring-amtfar-primary focus:border-amtfar-primary outline-none">
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end space-x-3">
+        <button type="button" (click)="cancelado.emit()" class="px-4 py-2 bg-slate-200 text-slate-700 hover:bg-slate-300 rounded transition font-medium">Cancelar</button>
+        <button type="submit" [disabled]="f.invalid || isLoading()" class="px-4 py-2 bg-amtfar-primary text-white hover:bg-green-700 rounded disabled:opacity-50 flex items-center font-medium transition">
+          @if (isLoading()) {
+            <span class="mr-2">Guardando...</span>
+          } @else {
+            <span>Guardar Farmacia</span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

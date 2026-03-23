@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
@@ -16,6 +17,7 @@ export class LoginComponent {
   hasError = signal(false);
 
   private authService = inject(AuthService);
+  private router = inject(Router);
 
   login() {
     if (!this.username() || !this.password()) return;
@@ -25,8 +27,7 @@ export class LoginComponent {
 
     this.authService.login({ username: this.username(), password: this.password() }).subscribe({
       next: () => {
-        // Redirige manejado internamente si quisieramos, o aquí:
-        // this.router.navigate(['/dashboard']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         console.error('Error de login', err);

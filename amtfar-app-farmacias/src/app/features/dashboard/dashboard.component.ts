@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 
@@ -9,8 +9,8 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnInit {
-  isLoading = true;
-  empleados: any[] = [];
+  isLoading = signal(true);
+  empleados = signal<any[]>([]);
 
   private http = inject(HttpClient);
   private cdr = inject(ChangeDetectorRef);
@@ -19,17 +19,15 @@ export class DashboardComponent implements OnInit {
     this.http.get<any>('http://127.0.0.1:8888/api/v1/empleados').subscribe({
       next: (res) => {
         if (res.status === 'success') {
-          this.empleados = res.data;
+          this.empleados.set(res.data);
         }
         setTimeout(() => {
-          this.isLoading = false;
-          this.cdr.detectChanges();
+          this.isLoading.set(false);
         }, 500); 
       },
       error: (err) => {
         console.error('Error cargando empleados:', err);
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        this.isLoading.set(false);
       }
     });
   }

@@ -9,11 +9,14 @@
     </a>
   </div>
 
-  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+  @if (isLoading()) {
+  <div class="flex justify-center items-center py-20">
     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-amtfar-primary"></div>
   </div>
+  }
 
-  <div *ngIf="!isLoading && boletas.length === 0" class="bg-white rounded-3xl p-12 text-center shadow-sm border border-slate-100">
+  @if (!isLoading() && boletas().length === 0) {
+  <div class="bg-white rounded-3xl p-12 text-center shadow-sm border border-slate-100">
     <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
       <i class="fas fa-file-invoice text-3xl text-slate-300"></i>
     </div>
@@ -23,8 +26,10 @@
       Comenzar ahora
     </a>
   </div>
+  }
 
-  <div *ngIf="!isLoading && boletas.length > 0" class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+  @if (!isLoading() && boletas().length > 0) {
+  <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead class="bg-slate-50 border-b border-slate-100">
@@ -38,7 +43,8 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-50">
-          <tr *ngFor="let boleta of boletas" class="hover:bg-slate-50/50 transition-colors group">
+          @for (boleta of boletas(); track boleta.id) {
+          <tr class="hover:bg-slate-50/50 transition-colors group">
             <td class="py-4 px-6 font-medium text-slate-700">#{{ boleta.id | number:'4.0' }}</td>
             <td class="py-4 px-6 text-slate-600 font-medium">{{ boleta.periodo_id }}</td>
             <td class="py-4 px-6 text-slate-500 text-sm">{{ boleta.fecha_boleta | date:'dd/MM/yyyy' }}</td>
@@ -52,24 +58,32 @@
               
               <div class="flex justify-end gap-2">
                 <!-- Botón Continuar si es Borrador -->
-                <a *ngIf="boleta.estado === 0" [routerLink]="['/app/boletas/editar', boleta.id]" 
+                @if (boleta.estado === 0) {
+                <a [routerLink]="['/app/boletas/editar', boleta.id]" 
                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amtfar-secondary/20 text-amtfar-primary hover:bg-amtfar-secondary transition-colors" title="Continuar Edición">
                   <i class="fas fa-edit"></i>
                 </a>
+                }
                 
                 <!-- Botones si ya está Generada (>=1) -->
-                <button *ngIf="boleta.estado > 0" (click)="descargarBoletaPdf(boleta.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" title="Descargar PDF">
+                @if (boleta.estado > 0) {
+                <button (click)="descargarBoletaPdf(boleta.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors" title="Descargar PDF">
                   <i class="fas fa-file-pdf"></i>
                 </button>
-                <button *ngIf="boleta.estado === 1" (click)="pagarBoleta(boleta.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 hover:bg-emerald-200 transition-colors" title="Pagar Ahora">
+                }
+                @if (boleta.estado === 1) {
+                <button (click)="pagarBoleta(boleta.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 hover:bg-emerald-200 transition-colors" title="Pagar Ahora">
                   <i class="fas fa-credit-card"></i>
                 </button>
+                }
               </div>
 
             </td>
           </tr>
+          }
         </tbody>
       </table>
     </div>
   </div>
+  }
 </div>

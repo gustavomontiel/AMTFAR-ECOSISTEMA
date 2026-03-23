@@ -9,7 +9,17 @@ export const routes: Routes = [
     path: 'dashboard', 
     loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
     canActivate: [roleGuard],
-    data: { requiredPermission: 'ver_dashboard' }
+    data: { requiredPermission: 'ver_dashboard' },
+    children: [
+      {
+         path: 'farmacias',
+         loadComponent: () => import('./features/farmacias/listado-farmacias/listado-farmacias.component').then(m => m.ListadoFarmaciasComponent)
+      },
+      {
+         path: 'boletas',
+         loadComponent: () => import('./features/boletas-global/listado-boletas-global/listado-boletas-global.component').then(m => m.ListadoBoletasGlobalComponent)
+      }
+    ]
   },
   { 
     path: 'reportes', 

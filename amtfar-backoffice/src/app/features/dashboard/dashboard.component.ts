@@ -22,6 +22,15 @@ import { AuthService } from '../../core/auth/auth.service';
             Gestionar Usuarios
           </a>
           }
+
+          @if (authService.hasPermission('gestionar_farmacias')) {
+          <a routerLink="/dashboard/farmacias" class="block py-2 px-4 rounded hover:bg-slate-50 text-slate-700">
+            Directorio de Farmacias
+          </a>
+          <a routerLink="/dashboard/boletas" class="block py-2 px-4 rounded hover:bg-slate-50 text-slate-700">
+            Visor de Boletas
+          </a>
+          }
           
           @if (authService.hasPermission('ver_reportes')) {
           <a routerLink="/reportes" class="block py-2 px-4 rounded hover:bg-slate-50 text-slate-700">

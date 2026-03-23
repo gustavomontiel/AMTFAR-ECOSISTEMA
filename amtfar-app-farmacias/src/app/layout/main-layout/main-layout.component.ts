@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectorRef, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
@@ -10,19 +10,18 @@ import { AuthService } from '../../core/auth/auth.service';
   templateUrl: './main-layout.component.html',
 })
 export class MainLayoutComponent implements OnInit {
-  isMenuOpen = false;
-  user: any = null;
+  isMenuOpen = signal(false);
+  user = signal<any>(null);
 
   private cdr = inject(ChangeDetectorRef);
   private authService = inject(AuthService);
 
   ngOnInit() {
-      this.user = this.authService.getUser();
+      this.user.set(this.authService.getUser());
   }
 
   toggleMenu() {
-    this.isMenuOpen = !this.isMenuOpen;
-    this.cdr.detectChanges();
+    this.isMenuOpen.update(v => !v);
   }
 
   logout() {

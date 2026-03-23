@@ -11,7 +11,7 @@ export class AuthService {
   private router = inject(Router);
   
   // En producción usar environment config
-  private apiUrl = 'http://localhost:8080/api'; 
+  private apiUrl = 'http://127.0.0.1:8888/api/v1/auth'; 
   
   private permisosSignal = signal<string[]>([]);
   public permisos = this.permisosSignal.asReadonly();

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BoletaService } from '../../../core/services/boleta.service';
@@ -18,9 +18,9 @@ export class GenerarBoletaComponent implements OnInit {
   categorias: any[] = [];
   empleados: any[] = [];
   resumen: any = null;
-  isLoading = true;
-  isCalculating = false;
-  isSaving = false;
+  isLoading = signal(true);
+  isCalculating = signal(false);
+  isSaving = signal(false);
   boletaId: number | null = null;
   
   // Paginación
@@ -64,7 +64,7 @@ export class GenerarBoletaComponent implements OnInit {
   }
 
   cargarBoletaBorrador(id: number) {
-    this.isLoading = true;
+    this.isLoading.set(true);
     this.boletaService.getBoleta(id).subscribe({
       next: (res) => {
         if (res.data && res.data.empleados) {
@@ -72,13 +72,13 @@ export class GenerarBoletaComponent implements OnInit {
           this.periodoActual = res.data.periodo; // Cargar el periodo del borrador
           this.recalcular();
         }
-        this.isLoading = false;
+        this.isLoading.set(false);
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error(err);
         Swal.fire('Error', 'No se pudo cargar el borrador o no existe.', 'error');
-        this.isLoading = false;
+        this.isLoading.set(false);
         this.cdr.detectChanges();
         this.router.navigate(['/app/boletas']);
       }
@@ -86,7 +86,7 @@ export class GenerarBoletaComponent implements OnInit {
   }
 
   cargarEmpleadosActivos() {
-    this.isLoading = true;
+    this.isLoading.set(true);
     this.boletaService.getEmpleadosActivos().subscribe({
       next: (res) => {
         if (res.status === 'success') {
@@ -107,12 +107,12 @@ export class GenerarBoletaComponent implements OnInit {
               this.recalcular();
           }
         }
-        this.isLoading = false;
+        this.isLoading.set(false);
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error cargando empleados activos', err);
-        this.isLoading = false;
+        this.isLoading.set(false);
         this.cdr.detectChanges();
       }
     });
@@ -168,7 +168,7 @@ export class GenerarBoletaComponent implements OnInit {
   }
 
   recalcular() {
-    this.isCalculating = true;
+    this.isCalculating.set(true);
     this.calcSubject.next();
   }
 
@@ -272,7 +272,7 @@ export class GenerarBoletaComponent implements OnInit {
   ejecutarCalculoEnBackend() {
     if (this.empleados.length === 0) {
         this.resumen = null;
-        this.isCalculating = false;
+        this.isCalculating.set(false);
         this.cdr.detectChanges();
         return;
     }
@@ -287,12 +287,12 @@ export class GenerarBoletaComponent implements OnInit {
         if (res.status === 'success') {
           this.resumen = res.data;
         }
-        this.isCalculating = false;
+        this.isCalculating.set(false);
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error calculando boleta', err);
-        this.isCalculating = false;
+        this.isCalculating.set(false);
         this.cdr.detectChanges();
       }
     });
@@ -309,7 +309,7 @@ export class GenerarBoletaComponent implements OnInit {
       return;
     }
 
-    this.isSaving = true;
+    this.isSaving.set(true);
     const payload = {
       periodo: this.periodoActual,
       empleados: this.empleados,
@@ -319,7 +319,7 @@ export class GenerarBoletaComponent implements OnInit {
 
     this.boletaService.generarBoleta(payload).subscribe({
       next: (res) => {
-        this.isSaving = false;
+        this.isSaving.set(false);
         
         let msg = isDraft ? 'Borrador guardado exitosamente.' : `Boleta #${res.data.boleta_id} generada y lista para pago.`;
         Swal.fire({
@@ -332,7 +332,7 @@ export class GenerarBoletaComponent implements OnInit {
         });
       },
       error: (err) => {
-        this.isSaving = false;
+        this.isSaving.set(false);
         console.error(err);
         Swal.fire('Error', 'Hubo un problema al procesar la boleta.', 'error');
       }

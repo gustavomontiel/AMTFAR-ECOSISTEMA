@@ -5,10 +5,11 @@ description: Buenas Prácticas, UI/UX y Arquitectura para Frontend con Angular 2
 
 Esta guía establece los estándares de calidad humana y tecnológica para desarrollar `amtfar-app-farmacias` y `amtfar-backoffice` con Angular 21.
 
-## 1. Arquitectura Angular (Standalone Components)
-Angular 21 se centra intensamente en los `Standalone Components` (sin módulos / `NgModule`).
-*   **Regla de Oro**: Todos los componentes, directivas y pipes nuevos deben generarse con la bandera `--standalone`.
-*   **Signals**: Utilizaremos la nueva reactividad basada en `Signals` (`signal()`, `computed()`, `effect()`) por encima de RxJS (`BehaviorSubject`) para el manejo del estado local o síncrono. RxJS solo se usará para peticiones HTTP pasadas a Signals con `toSignal()`.
+## 1. Arquitectura Angular (Standalone Components y Control Flow)
+Angular 21 se centra intensamente en los `Standalone Components` (sin módulos / `NgModule`) y evoluciona la sintaxis nativa de plantillas.
+*   **Regla de Oro (Standalone)**: Todos los componentes, directivas y pipes nuevos deben generarse con la bandera `--standalone` (verdadero por defecto en v17+).
+*   **Control Flow Nativo (OBLIGATORIO)**: Queda ESTRICTAMENTE PROHIBIDO el uso de las viejas directivas estructurales (`*ngIf`, `*ngFor`, `*ngSwitch`). TODO el HTML debe escrbirse utilizando la nueva sintaxis de bloques optimizada: `@if`, `@for` (siempre con la cláusula `track`) y `@switch`.
+*   **Signals por Defecto (Estado Local)**: Siempre que inicialices una variable de estado en un componente (ej. visibilidad, estados de carga, campos de formularios simples), DEBEMOS utilizar `signal()` de `@angular/core` en lugar de variables planas. Usa `.set()` y `.update()` para modificarlas y léelas como funciones `()` en los templates. RxJS solo se usará pasivamente para peticiones HTTP (o combinadas con `toSignal()`).
 
 ## 2. Organización del Proyecto (Feature-Based)
 ```text
