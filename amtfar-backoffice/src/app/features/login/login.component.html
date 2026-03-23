@@ -1,0 +1,36 @@
+<div class="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+  <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md border-t-4 border-amtfar-primary">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-slate-800">AMTFAR Backoffice</h1>
+      <p class="text-slate-500 text-sm mt-2">Ingresa tus credenciales administrativas</p>
+    </div>
+
+    <form (ngSubmit)="login()" class="space-y-6">
+      
+      <div *ngIf="hasError" class="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4">
+        Usuario o contraseña incorrectos.
+      </div>
+
+      <div>
+        <label for="username" class="block text-sm font-medium text-slate-700 mb-1">Nombre de Usuario</label>
+        <input id="username" type="text" [(ngModel)]="username" name="username" required
+               class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amtfar-primary focus:border-amtfar-primary outline-none transition-all"
+               placeholder="Ej: admin">
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
+        <input id="password" type="password" [(ngModel)]="password" name="password" required
+               class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amtfar-primary focus:border-amtfar-primary outline-none transition-all"
+               placeholder="••••••••">
+      </div>
+
+      <button type="submit" [disabled]="isLoading || !username || !password"
+              class="w-full amtfar-btn-primary flex justify-center py-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+        <span *ngIf="!isLoading">Ingresar al Sistema</span>
+        <span *ngIf="isLoading" class="animate-pulse">Verificando...</span>
+      </button>
+
+    </form>
+  </div>
+</div>
