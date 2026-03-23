@@ -36,16 +36,16 @@
 
       <div class="space-y-4">
         <div>
-          <label for="username" class="block text-sm font-medium text-slate-700">Usuario (CUIT o email)</label>
+          <label for="cuit" class="block text-sm font-medium text-slate-700">Número de CUIT</label>
           <div class="mt-1 relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-slate-400">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
             </div>
-            <input id="username" name="username" type="text" [(ngModel)]="username" required 
+            <input id="cuit" name="cuit" type="text" [(ngModel)]="cuit" required 
                    class="appearance-none block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amtfar-primary focus:border-amtfar-primary sm:text-sm transition-shadow" 
-                   placeholder="Ingresa tu usuario">
+                   placeholder="Ingresa tu CUIT (11 dígitos, sin guiones)">
           </div>
         </div>
 
@@ -90,7 +90,7 @@
       </div>
 
       <div>
-        <button type="submit" [disabled]="isLoading || !username || !password" 
+        <button type="submit" [disabled]="isLoading || !cuit || !password" 
                 class="amtfar-btn-primary w-full flex justify-center py-3 text-base disabled:opacity-70 disabled:cursor-not-allowed group relative overflow-hidden">
           
           <span *ngIf="!isLoading" class="flex items-center gap-2">

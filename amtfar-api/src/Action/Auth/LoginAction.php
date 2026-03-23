@@ -11,10 +11,11 @@ class LoginAction
     public function __invoke(Request $request, Response $response, array $args): Response
     {
         $body = $request->getParsedBody();
-        $username = $body['username'] ?? '';
+        $identifier = $body['username'] ?? ''; // El frontend enviará username o cuit aquí
         $password = $body['password'] ?? '';
+        $type = $body['type'] ?? ''; // 'farmacia' o 'backoffice'
 
-        if (empty($username) || empty($password)) {
+        if (empty($identifier) || empty($password)) {
             $response->getBody()->write(json_encode([
                 'status' => 'error',
                 'message' => 'Credenciales incompletas.'
@@ -22,14 +23,13 @@ class LoginAction
             return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
-        // Buscar al usuario
-        $usuario = Usuario::with(['farmacia', 'rol'])->where('username', $username)->first();
-
         // Validación
         $isValidAuth = false;
+        $usuario = null;
+        $permisos = [];
 
-        if ($username === 'admin' && $password === '123') {
-             // Mock Admin overrides DB check
+        // Mock Admin overrides DB check
+        if ($identifier === 'admin' && $password === '123') {
              $isValidAuth = true;
              $usuario = (object)[
                  'id' => 1,
@@ -39,9 +39,23 @@ class LoginAction
                  'farmacia' => null,
                  'rol' => (object)['descripcion' => 'SuperAdmin']
              ];
-        } else if ($usuario) {
-             // Comprobar BD Real
-             if ($password === $usuario->password) {
+             $permisos = ['ver_dashboard', 'gestionar_usuarios', 'gestionar_farmacias', 'ver_reportes'];
+        } else {
+             // Try to find as Farmacia if type is farmacia or identifier is numeric length 11
+             if ($type === 'farmacia' || (is_numeric($identifier) && strlen((string)$identifier) === 11)) {
+                 $farmacia = \App\Domain\Models\Farmacia::where('cuit', $identifier)->first();
+                 if ($farmacia) {
+                     $usuario = Usuario::with(['farmacia', 'rol'])->where('farmacia_id', $farmacia->id)->first();
+                 }
+             } else {
+                 // Try to find as Backoffice
+                 $usuario = Usuario::with(['rol.permisos'])->where('username', $identifier)->whereNull('farmacia_id')->first();
+                 if ($usuario && $usuario->rol) {
+                     $permisos = $usuario->rol->permisos->pluck('nombre')->toArray();
+                 }
+             }
+
+             if ($usuario && $password === $usuario->password) {
                  $isValidAuth = true;
              }
         }
@@ -54,7 +68,7 @@ class LoginAction
             return $response->withHeader('Content-Type', 'application/json')->withStatus(401);
         }
 
-        if ($usuario->estado != 1) {
+        if ($usuario->estado != 1) { // == 0 inactivos etc
              $response->getBody()->write(json_encode([
                 'status' => 'error',
                 'message' => 'El usuario se encuentra inactivo.'
@@ -76,7 +90,8 @@ class LoginAction
             'data' => [
                 'id_usuario' => $usuario->id,
                 'username'   => $usuario->username,
-                'id_farmacia' => $usuario->farmacia_id,
+                'id_farmacia' => $usuario->farmacia_id ?? null,
+                'permisos'   => $permisos
             ]
         ];
 
@@ -90,7 +105,8 @@ class LoginAction
                 'user' => [
                     'username' => $usuario->username,
                     'rol' => $usuario->rol->descripcion ?? 'Farmacia',
-                    'farmacia' => $usuario->farmacia->nombre_fantasia ?? 'Sede Central'
+                    'farmacia' => $usuario->farmacia->nombre_fantasia ?? 'Sede Central',
+                    'permisos' => $permisos
                 ]
             ]
         ]));

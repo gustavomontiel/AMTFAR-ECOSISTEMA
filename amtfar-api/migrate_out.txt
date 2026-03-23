@@ -1,0 +1,8 @@
+Creating permissions tables...
+Fatal Error: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it (Connection: default, SQL: 
+        CREATE TABLE IF NOT EXISTS permisos (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            nombre VARCHAR(50) UNIQUE NOT NULL,
+            descripcion VARCHAR(255) NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    )

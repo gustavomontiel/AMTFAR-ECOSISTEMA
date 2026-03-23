@@ -11,7 +11,7 @@ import { AuthService } from '../../../core/auth/auth.service';
   templateUrl: './login.component.html',
 })
 export class LoginComponent {
-  username = '';
+  cuit = '';
   password = '';
   isLoading = false;
   hasError = false;
@@ -26,13 +26,13 @@ export class LoginComponent {
   }
 
   login() {
-    if (!this.username || !this.password) return;
+    if (!this.cuit || !this.password) return;
     
     this.isLoading = true;
     this.hasError = false;
     this.cdr.detectChanges();
 
-    this.authService.login({ username: this.username, password: this.password }).subscribe({
+    this.authService.login({ username: this.cuit, password: this.password, type: 'farmacia' }).subscribe({
       next: (res) => {
         if (res.status === 'success') {
           this.router.navigate(['/app/dashboard']);
