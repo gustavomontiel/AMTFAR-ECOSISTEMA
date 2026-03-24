@@ -27,12 +27,14 @@ El sistema debe sentirse vivo y comunicativo.
 
 ## 4. Tipografía, Colores y Accesibilidad (A11y)
 *   **Tipografía Moderna**: Usar fuentes *Sans-Serif* limpias y de buena altura-x como `Inter`, `Roboto` o `Nunito`. Nunca usar fuentes por defecto del navegador.
+*   **Identidad y Estándares FATFA**: Las paletas de colores, iconografía y estética general deben corresponderse estrictamente con los lineamientos gráficos institucionales de FATFA.
 *   **Contraste Óptimo (WCAG 2.1)**: Los textos deben tener buen contraste contra el fondo. Evitar usar gris claro sobre fondo blanco para textos importantes.
 *   **Consistencia en la Paleta de Colores**: 
     - **Primario**: Para la acción más importante (el "Call to Action").
     - **Secundario/Outline**: Para acciones alternativas (ej. "Cancelar" o "Ver más").
     - **Peligro (Rojo/Naranja)**: Solo para botones destructivos ("Eliminar Empleado", "Anular Boleta"). Un botón de cancelar a menudo no es destructivo, simplemente debería ser un botón neutro o "gris".
 *   **Indicadores Visuales No Solo Basados en Color**: Si una boleta está "Pendiente" o "Pagada", acompañar el color con un ícono explícito (un tick de éxito, o un reloj de espera) previendo temas de daltonismo o mala calibración del monitor.
+*   **Identificación Directa de Deudas**: Los listados de boletas impagas o farmacias deudoras deben resaltarse jerárquicamente, ofreciendo rápido acceso a sus datos de contacto para cobranza.
 
 ## 5. Mobile-First Responsiveness (Adaptabilidad)
 Aunque el Backoffice pueda usarse mayormente en desktop, la App Farmacias puede ser vista en tablets o celulares.

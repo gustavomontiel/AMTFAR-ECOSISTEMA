@@ -36,3 +36,11 @@ Estandarizar el formato de salida JSON. Todo Action debe construir una respuesta
 
 ## 6. Validación de Datos (DTOs)
 Las validaciones de los POST/PUT deben ocurrir antes de llegar a la capa de Dominio, preferentemente a nivel de *Action* usando una librería como `Respect/Validation`.
+
+## 7. Lógica de Negocio y Dominio Core (Ecosistema AMTFAR)
+El ecosistema exige adherencia a los siguientes procesos:
+*   **Gestión de Farmacias**: Alta (creación de acceso) y Baja lógica (con `fecha_baja`). **Regla de negocio estricta:** La farmacia está obligada a generar y pagar boletas *hasta el mes correspondiente a su fecha de baja inclusive*. Ej: Si se carga baja el 20/03/2026, la farmacia debe generar la boleta de Marzo 2026. A partir del período siguiente cesa su morosidad y obligación.
+*   **Remuneraciones y Padrón**: La carga de remuneraciones mensuales deriva en la generación de la boleta y en la **actualización automática del padrón** de empleados (historial y altas).
+*   **Pagos e Integraciones**: Soporte de cobro por ventanilla, transferencia y pasarela. Implementar **Webhooks robustos** e **idempotencia** para evitar cobros duplicados.
+*   **Reportes Backoffice**: Consultas eficientes de recaudación, morosidad (boletas no generadas o impagas), cobranzas agrupadas y reportes combinados de padrón/categoría.
+*   **Soft Deletes Asegurados**: Absolutamente prohibido aplicar `DELETE` sobre entidades transaccionales (boletas, farmacias, padrón); usar logs de auditoría.

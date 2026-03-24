@@ -37,3 +37,8 @@ Nuestro objetivo es llevar a AMTFAR a un ecosistema de diseño "Wow" y muy intui
 *   Todo llamado a Slim PHP se hará en Services específicos usando `HttpClient`.
 *   Toda respuesta debe ser tipada mediante `Interfaces TypeScript` de forma estricta (`getBoletas(): Observable<BoletaResponse>`). Nunca usar `any`.
 *   Usar interceptores HTTP para el paso automático del Token de JWT.
+
+## 5. Diseño de Flujos Core (AMTFAR)
+*   **App Farmacias (Portal de Carga)**: El flujo de carga de remuneraciones por período y empleado debe ser transparente. La opción de pago debe elegirse claramente (Ventanilla, Transferencia, Pago Web). La UI debe recalcar la actualización del padrón.
+*   **App Backoffice (Monitor & Reportes)**: Vistas de recaudación, seguimiento de deudores, altas/bajas de farmacias y consulta de padrón con grillas funcionales completas.
+
