@@ -3,6 +3,7 @@ namespace App\Action\Boleta;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use App\Domain\Models\Farmacia;
 use App\Domain\Models\Boleta;
 use App\Domain\Models\BoletaRemuneracion;
 use App\Domain\Models\BoletaConcepto;
@@ -31,6 +32,49 @@ class CrearBoletaAction
         $isDraft = !empty($payload['is_draft']);
         $estado = $isDraft ? 0 : 1;
 
+        // --- VALIDACIÓN ESTRICTA: BLOQUEO CRONOLÓGICO ---
+        // Evitamos que guarden/generen un periodo si faltan meses anteriores (Boletas Salteadas)
+        $farmacia = Farmacia::find($id_farmacia);
+        $primeraBoleta = Boleta::where('farmacia_id', $id_farmacia)->where('estado', '>', 0)->orderBy('periodo_id', 'asc')->first();
+        
+        $anyoReq = substr($periodo_str, 0, 4);
+        $mesReq = substr($periodo_str, 4, 2);
+        $fechaTope = new \DateTime("$anyoReq-$mesReq-01");
+        $fechaTope->modify('-1 month'); // Exigimos hasta el mes anterior exacto al que intenta declarar
+
+        $fechaAlta = null;
+        if ($farmacia && $farmacia->fecha_alta) {
+            $fechaAlta = new \DateTime($farmacia->fecha_alta);
+        } else if ($primeraBoleta && $primeraBoleta->periodo_id < $periodo_str) {
+            $anyoPrim = substr($primeraBoleta->periodo_id, 0, 4);
+            $mesPrim = substr($primeraBoleta->periodo_id, 4, 2);
+            $fechaAlta = new \DateTime("$anyoPrim-$mesPrim-01");
+        }
+
+        if ($fechaAlta && $fechaAlta <= $fechaTope) {
+            $fechaAlta->modify('first day of this month');
+            $boletasValidadas = Boleta::where('farmacia_id', $id_farmacia)->get()->keyBy('periodo_id');
+            
+            $currentDate = clone $fechaAlta;
+            while ($currentDate <= $fechaTope) {
+                $perIdCheck = $currentDate->format('Ym');
+                // Si falta la boleta por completo del mes anterior...
+                if (!$boletasValidadas->has($perIdCheck)) {
+                    $response->getBody()->write(json_encode(['status' => 'error', 'message' => "Bloqueo Cronológico: No puede declarar el período actual porque falta registrar la nómina del período previo ($perIdCheck)."]));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(403);
+                } else {
+                    $bolCheck = $boletasValidadas->get($perIdCheck);
+                    // Si la boleta del mes anterior existe pero se quedó en borrador.
+                    if ($bolCheck->estado == 0 && $perIdCheck != $periodo_str) {
+                        $response->getBody()->write(json_encode(['status' => 'error', 'message' => "Bloqueo Cronológico: El período previo ($perIdCheck) aún está en estado Borrador. Debe finalizarlo antes de continuar con meses posteriores."]));
+                        return $response->withHeader('Content-Type', 'application/json')->withStatus(403);
+                    }
+                }
+                $currentDate->modify('+1 month');
+            }
+        }
+        // --- FIN VALIDACIÓN ---
+
         DB::beginTransaction();
         try {
             // Verificar o Crear el periodo
@@ -43,7 +87,10 @@ class CrearBoletaAction
             // Si ES borrador, solo lo guardamos en la cabecera como JSON y calculamos visualmente.
             if (!$isDraft) {
                 // Procesar Empleados
+                $incomingCuils = [];
                 foreach ($empleadosPayload as $reqEmp) {
+                    $incomingCuils[] = preg_replace('/[^0-9]/', '', (string)$reqEmp['cuil']);
+
                     // Upsert Persona
                     $persona = Persona::updateOrCreate(
                         ['cuil' => $reqEmp['cuil']],
@@ -76,6 +123,25 @@ class CrearBoletaAction
                         'fecha_ingreso_historica' => empty($reqEmp['fecha_ingreso']) ? null : $reqEmp['fecha_ingreso']
                     ]);
                 }
+
+                // --- REGLA DE NEGOCIO: Bajas automáticas para empleados omitidos ---
+                $activeEmpleados = Empleado::with('persona')->where('farmacia_id', $id_farmacia)->where('estado_baja', 0)->get();
+                // Fecha de egreso arbitraria: último día del mes anterior al periodo declarado.
+                // Ej: si periodo es "202603", strtotime("20260301 -1 month") -> Feb 2026, "Y-m-t" da el día 28.
+                $lastDayPrevMonth = date("Y-m-t", strtotime($periodo_str . "01 -1 month"));
+                
+                foreach ($activeEmpleados as $empDb) {
+                    if ($empDb->persona && $empDb->persona->cuil) {
+                        $dbCuil = preg_replace('/[^0-9]/', '', (string)$empDb->persona->cuil);
+                        if (!in_array($dbCuil, $incomingCuils)) {
+                            // Si NO está en la boleta actual, se da de baja
+                            $empDb->fecha_egreso = $lastDayPrevMonth;
+                            $empDb->estado_baja = 1;
+                            $empDb->save();
+                        }
+                    }
+                }
+
             } else {
                 // Cálculo simple de total para el draft sin insertar empleados
                 foreach ($empleadosPayload as $reqEmp) {

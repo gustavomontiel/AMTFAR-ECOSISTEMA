@@ -9,7 +9,7 @@ import { AuthService } from '../auth/auth.service';
 export class BoletaService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
-  private apiUrl = 'http://127.0.0.1:8888/api/v1/boletas';
+  private apiUrl = 'http://amtfar-api.test/api/v1/boletas';
 
   private getHeaders() {
     const token = this.authService.getToken();
@@ -27,11 +27,11 @@ export class BoletaService {
   }
 
   getBoleta(id: number): Observable<any> {
-    return this.http.get(`http://127.0.0.1:8888/api/v1/boletas/${id}`, { headers: this.getHeaders() });
+    return this.http.get(`http://amtfar-api.test/api/v1/boletas/${id}`, { headers: this.getHeaders() });
   }
 
   descargarBoletaPdf(id: number): Observable<Blob> {
-    return this.http.get(`http://127.0.0.1:8888/api/v1/boletas/${id}/pdf`, {
+    return this.http.get(`http://amtfar-api.test/api/v1/boletas/${id}/pdf`, {
       headers: this.getHeaders(),
       responseType: 'blob'
     });
@@ -46,14 +46,14 @@ export class BoletaService {
   }
 
   getPersonaByCuil(cuil: string): Observable<any> {
-    return this.http.get<any>(`http://127.0.0.1:8888/api/v1/personas/${cuil}`, { headers: this.getHeaders() });
+    return this.http.get<any>(`http://amtfar-api.test/api/v1/personas/${cuil}`, { headers: this.getHeaders() });
   }
 
   getCategorias(): Observable<any> {
-    return this.http.get<any>(`http://127.0.0.1:8888/api/v1/maestros/categorias`, { headers: this.getHeaders() });
+    return this.http.get<any>(`http://amtfar-api.test/api/v1/maestros/categorias`, { headers: this.getHeaders() });
   }
 
   getEmpleadosActivos(): Observable<any> {
-    return this.http.get<any>(`http://127.0.0.1:8888/api/v1/empleados`, { headers: this.getHeaders() });
+    return this.http.get<any>(`http://amtfar-api.test/api/v1/empleados`, { headers: this.getHeaders() });
   }
 }

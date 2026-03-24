@@ -1,20 +1,7 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-
-export interface Periodo {
-  mes: string;
-  anio: number;
-  estado: 'SIN_BOLETA' | 'IMPAGA';
-  monto?: number;
-  boletaId?: number;
-  bloqueado?: boolean;
-}
-
-export interface ResumenCategoria {
-  categoria: string;
-  cantidad: number;
-}
+import { RouterModule, Router } from '@angular/router';
+import { DashboardService, PeriodoDashboard, ResumenCategoria } from '../../core/services/dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,42 +12,49 @@ export interface ResumenCategoria {
 export class DashboardComponent implements OnInit {
   isLoading = signal(true);
   
+  private dashboardService = inject(DashboardService);
+  private router = inject(Router);
+
   // Estado General
-  tieneDeuda = signal(true);
-  deudaTotal = signal(45900);
+  tieneDeuda = signal(false);
+  deudaTotal = signal(0);
   
   // Períodos 
-  periodos = signal<Periodo[]>([]);
+  periodos = signal<PeriodoDashboard[]>([]);
   
   // Resumen del Padrón (última DDJJ)
-  totalEmpleados = signal(12);
+  totalEmpleados = signal(0);
   desgloseCategorias = signal<ResumenCategoria[]>([]);
 
   ngOnInit() {
-    // Mocking API call for Dashboard initialization
-    setTimeout(() => {
-      this.periodos.set([
-        { mes: 'Febrero', anio: 2026, estado: 'IMPAGA', monto: 45900, boletaId: 1052, bloqueado: false },
-        { mes: 'Marzo', anio: 2026, estado: 'SIN_BOLETA', bloqueado: true } // Bloqueado cronológicamente por Febrero
-      ]);
-      
-      this.desgloseCategorias.set([
-        { categoria: 'Farmacéutico', cantidad: 3 },
-        { categoria: 'Ayudante', cantidad: 4 },
-        { categoria: 'Personal Auxiliar', cantidad: 5 }
-      ]);
-      
-      this.isLoading.set(false);
-    }, 800);
+    this.dashboardService.getDashboardData().subscribe({
+      next: (res) => {
+        if (res.status === 'success') {
+          const data = res.data;
+          this.tieneDeuda.set(data.tieneDeuda);
+          this.deudaTotal.set(data.deudaTotal);
+          this.periodos.set(data.periodos);
+          this.totalEmpleados.set(data.totalEmpleados);
+          this.desgloseCategorias.set(data.desgloseCategorias);
+        }
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error cargando dashboard', err);
+        this.isLoading.set(false);
+      }
+    });
   }
 
-  iniciarCarga(periodo: Periodo) {
+  iniciarCarga(periodo: PeriodoDashboard) {
     if (periodo.bloqueado) return;
+    // Navegar a generar boleta pasando el periodo ID
     console.log('Navegando a carga de nómina para', periodo.mes);
-    // Router navigate...
+    this.router.navigate(['/app/boletas/generar']);
   }
 
-  pagarBoleta(periodo: Periodo) {
+  pagarBoleta(periodo: PeriodoDashboard) {
     console.log('Abriendo pasarela o opciones para boleta', periodo.boletaId);
+    // TODO: Implementar pago real
   }
 }

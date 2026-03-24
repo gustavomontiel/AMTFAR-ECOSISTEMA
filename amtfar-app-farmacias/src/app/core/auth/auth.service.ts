@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private apiUrl = 'http://127.0.0.1:8888/api/v1/auth';
+  private apiUrl = 'http://amtfar-api.test/api/v1/auth';
 
   private readonly TOKEN_KEY = 'amtfar_jwt';
   private readonly USER_KEY = 'amtfar_user';

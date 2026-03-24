@@ -22,6 +22,7 @@ export class GenerarBoletaComponent implements OnInit {
   isCalculating = signal(false);
   isSaving = signal(false);
   boletaId: number | null = null;
+  empleadosOriginales: any[] = []; // Para detectar bajas por omisión
   
   // Paginación
   paginaActual = 1;
@@ -92,6 +93,7 @@ export class GenerarBoletaComponent implements OnInit {
         if (res.status === 'success') {
           // Filtrar solo los empleados activos (estado_baja == 0)
           const activos = (res.data || []).filter((e: any) => e.estado_baja === 0);
+          this.empleadosOriginales = JSON.parse(JSON.stringify(activos)); // Backup para comparar ausencias
           
           this.empleados = activos.map((e: any) => ({
             cuil: e.cuil,
@@ -309,6 +311,37 @@ export class GenerarBoletaComponent implements OnInit {
       return;
     }
 
+    if (!isDraft) {
+        const cuilsActuales = this.empleados.map(e => String(e.cuil).replace(/[-\s_]/g, ''));
+        const empleadosAusentes = this.empleadosOriginales.filter(eo => {
+            const cuilOrig = String(eo.cuil).replace(/[-\s_]/g, '');
+            return !cuilsActuales.includes(cuilOrig);
+        });
+
+        if (empleadosAusentes.length > 0) {
+            const nombres = empleadosAusentes.map(e => `<li>${e.nombre} (CUIL: ${e.cuil})</li>`).join('');
+            Swal.fire({
+                title: 'Bajas Automáticas Detectadas',
+                html: `<p>Los siguientes empleados no están en la boleta actual. <b>Serán dados de baja</b> automáticamente (fecha arbitraria: último día del mes anterior):</p><ul style="text-align:left; color:#d33; font-size: 0.9em; max-height: 150px; overflow-y: auto;">${nombres}</ul><p>¿Deseas generar la boleta y aplicar las bajas?</p>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, generar y dar de baja',
+                cancelButtonText: 'Revisar nómina'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.enviarBoleta(isDraft);
+                }
+            });
+            return;
+        }
+    }
+
+    this.enviarBoleta(isDraft);
+  }
+
+  private enviarBoleta(isDraft: boolean) {
     this.isSaving.set(true);
     const payload = {
       periodo: this.periodoActual,
@@ -322,19 +355,68 @@ export class GenerarBoletaComponent implements OnInit {
         this.isSaving.set(false);
         
         let msg = isDraft ? 'Borrador guardado exitosamente.' : `Boleta #${res.data.boleta_id} generada y lista para pago.`;
-        Swal.fire({
-          icon: 'success',
-          title: isDraft ? 'Borrador' : '¡Generación Exitosa!',
-          text: msg,
-          confirmButtonColor: '#0E7A44'
-        }).then(() => {
-          this.router.navigate(['/app/boletas']);
-        });
+        if (isDraft) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Borrador',
+              text: msg,
+              confirmButtonColor: '#0E7A44'
+            }).then(() => {
+              this.router.navigate(['/app/boletas']);
+            });
+        } else {
+            Swal.fire({
+              icon: 'success',
+              title: '¡Generación Exitosa!',
+              text: msg,
+              showDenyButton: true,
+              confirmButtonText: 'Ir al Listado',
+              denyButtonText: '<i class="fas fa-file-pdf"></i> Descargar PDF',
+              confirmButtonColor: '#0E7A44',
+              denyButtonColor: '#3085d6'
+            }).then((result) => {
+              if (result.isDenied) {
+                  this.descargarBoletaPdf(res.data.boleta_id);
+              } else {
+                  this.router.navigate(['/app/boletas']);
+              }
+            });
+        }
       },
       error: (err) => {
         this.isSaving.set(false);
         console.error(err);
         Swal.fire('Error', 'Hubo un problema al procesar la boleta.', 'error');
+      }
+    });
+  }
+
+  descargarBoletaPdf(id: number) {
+    Swal.fire({
+      title: 'Generando PDF',
+      text: 'Por favor espere...',
+      allowOutsideClick: false,
+      didOpen: () => { Swal.showLoading(); }
+    });
+
+    this.boletaService.descargarBoletaPdf(id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `boleta_${id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        Swal.close();
+        this.router.navigate(['/app/boletas']);
+      },
+      error: (err) => {
+        console.error(err);
+        Swal.fire('Error', 'No se pudo generar el reporte. Verifique que Jasper esté configurado.', 'error').then(() => {
+            this.router.navigate(['/app/boletas']);
+        });
       }
     });
   }

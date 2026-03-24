@@ -47,6 +47,7 @@ return function (App $app) {
         })->add(\App\Middleware\JwtAuthMiddleware::class);
 
         $group->group('/farmacias', function ($farmaciasGroup) {
+            $farmaciasGroup->get('/dashboard', \App\Action\Farmacia\GetDashboardFarmaciaAction::class);
             $farmaciasGroup->get('', \App\Action\Farmacia\ListarFarmaciasAction::class);
             $farmaciasGroup->post('', \App\Action\Farmacia\CrearFarmaciaAction::class);
             $farmaciasGroup->put('/{id:[0-9]+}', \App\Action\Farmacia\ActualizarFarmaciaAction::class);
