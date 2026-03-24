@@ -62,5 +62,9 @@ return function (App $app) {
             $personaGroup->get('/{cuil}', \App\Action\Persona\GetPersonaByCuilAction::class);
         })->add(\App\Middleware\JwtAuthMiddleware::class);
 
+        $group->group('/admin', function ($adminGroup) {
+            $adminGroup->get('/dashboard', \App\Action\Admin\GetAdminDashboardAction::class);
+        })->add(\App\Middleware\JwtAuthMiddleware::class);
+
     });
 };

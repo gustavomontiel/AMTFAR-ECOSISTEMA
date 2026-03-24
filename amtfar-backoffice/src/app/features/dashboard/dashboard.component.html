@@ -1,0 +1,126 @@
+<div class="p-8">
+  <div class="mb-8">
+    <h2 class="text-3xl font-black text-slate-800 tracking-tight">Monitor Global</h2>
+    <p class="text-slate-500 mt-1 flex items-center gap-2"><i class="fas fa-shield-alt text-amtfar-primary"></i> Auditoría y Fiscalización AMTFAR</p>
+  </div>
+
+  @if (isLoading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-amtfar-primary"></div>
+    </div>
+  } @else {
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in-up">
+      <!-- KPI 1 -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex items-center hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl mr-4 shrink-0">
+          <i class="fas fa-store"></i>
+        </div>
+        <div>
+          <p class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Empadronadas</p>
+          <h3 class="text-2xl font-black text-slate-800 leading-none">{{ kpis().farmacias_activas }}</h3>
+        </div>
+      </div>
+
+      <!-- KPI 2 -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex items-center hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl mr-4 shrink-0">
+          <i class="fas fa-users"></i>
+        </div>
+        <div>
+          <p class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Padrón Global Activo</p>
+          <h3 class="text-2xl font-black text-slate-800 leading-none">{{ kpis().empleados_activos }}</h3>
+        </div>
+      </div>
+
+      <!-- KPI 3 -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex items-center hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-amtfar-primary/10 text-amtfar-primary flex items-center justify-center text-xl mr-4 shrink-0">
+          <i class="fas fa-hand-holding-usd"></i>
+        </div>
+        <div>
+          <p class="text-[0.65rem] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Recaudación (Mes Actual)</p>
+          <h3 class="text-2xl font-black text-slate-800 leading-none">${{ kpis().recaudacion_mes | number:'1.2-2' }}</h3>
+        </div>
+      </div>
+
+      <!-- KPI 4 -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-red-100 flex items-center hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-xl mr-4 shrink-0">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <div>
+          <p class="text-[0.65rem] font-bold text-red-400 uppercase tracking-widest leading-none mb-1">Deuda Corriente</p>
+          <h3 class="text-2xl font-black text-red-600 leading-none">${{ kpis().deuda_mes | number:'1.2-2' }}</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ranking F-Pattern -->
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden animate-fade-in-up" style="animation-delay: 0.1s;">
+      <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <h3 class="text-lg font-black text-slate-800 tracking-tight"><i class="fas fa-exclamation-triangle text-red-500 mr-2"></i> Ranking de Morosidad (Top Deudores)</h3>
+        <button class="text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-amtfar-primary transition-colors flex items-center">
+          Ver Histórico <i class="fas fa-arrow-right ml-1"></i>
+        </button>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[700px]">
+          <thead class="bg-white border-b border-slate-100">
+            <tr>
+              <th class="py-4 px-6 font-bold text-slate-400 text-[10px] uppercase tracking-widest w-16 text-center">Pos</th>
+              <th class="py-4 px-6 font-bold text-slate-400 text-[10px] uppercase tracking-widest">Farmacia Info</th>
+              <th class="py-4 px-6 font-bold text-slate-400 text-[10px] uppercase tracking-widest text-center">Períodos Caídos</th>
+              <th class="py-4 px-6 font-bold text-slate-400 text-[10px] uppercase tracking-widest text-right">Deuda Consolidada</th>
+              <th class="py-4 px-6 font-bold text-slate-400 text-[10px] uppercase tracking-widest text-center w-24">Revisar</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            @for (item of rankingMorosidad(); track item.id; let idx = $index) {
+            <tr class="hover:bg-red-50/40 transition-colors group">
+              <td class="py-4 px-6 text-center">
+                <div class="w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm mx-auto shadow-sm"
+                     [ngClass]="{'bg-red-500 text-white shadow-red-500/30': idx === 0, 'bg-red-400 text-white': idx === 1, 'bg-red-300 text-white': idx === 2, 'bg-slate-100 text-slate-500': idx >= 3}">
+                  {{ idx + 1 }}
+                </div>
+              </td>
+              <td class="py-4 px-6">
+                <p class="font-black text-slate-700 leading-tight">{{ item.denominacion }}</p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] uppercase font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">CUIT</span>
+                  <span class="text-xs text-slate-500 font-mono">{{ item.cuit }}</span>
+                </div>
+              </td>
+              <td class="py-4 px-6 text-center">
+                <span class="inline-flex items-center justify-center px-3 py-1 rounded-lg text-xs font-black bg-amber-50 text-amber-600 border border-amber-200 shadow-sm">
+                  <i class="fas fa-file-invoice mr-1.5 opacity-70"></i> {{ item.boletas_impagas }}
+                </span>
+              </td>
+              <td class="py-4 px-6 text-right font-black text-red-600 text-lg tracking-tight">
+                $ {{ item.deuda_total | number:'1.2-2' }}
+              </td>
+              <td class="py-4 px-6 text-center">
+                <button class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 text-slate-500 hover:bg-slate-800 hover:text-white transition-all transform hover:scale-105 shadow-sm" title="Inspeccionar">
+                  <i class="fas fa-search"></i>
+                </button>
+              </td>
+            </tr>
+            }
+            @if (rankingMorosidad().length === 0) {
+            <tr>
+              <td colspan="5" class="py-16 text-center">
+                <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-emerald-100">
+                  <i class="fas fa-check-circle text-2xl text-emerald-500"></i>
+                </div>
+                <h4 class="text-lg font-black text-slate-700 tracking-tight">¡Padrón al día!</h4>
+                <p class="text-sm font-medium text-slate-500 mt-1 max-w-sm mx-auto">Actualmente el sistema no registra farmacias con morosidad activa ni boletas impagas.</p>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

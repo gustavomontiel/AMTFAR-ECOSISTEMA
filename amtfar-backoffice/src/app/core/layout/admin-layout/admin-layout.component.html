@@ -1,0 +1,99 @@
+<div class="h-screen w-full flex bg-slate-50 font-sans overflow-hidden">
+  
+  <!-- Sidebar (Desktop) -->
+  <aside class="hidden md:flex flex-col w-72 bg-slate-900 text-white shadow-xl h-full transition-all duration-300">
+    <div class="h-20 flex px-8 items-center bg-slate-950 border-b border-slate-800">
+      <div class="w-10 h-10 bg-amtfar-primary rounded-xl flex items-center justify-center mr-3 shadow-lg shadow-amtfar-primary/20">
+        <i class="fas fa-chart-pie text-xl text-white"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-black tracking-tight text-white leading-tight">Backoffice</h1>
+        <p class="text-[0.65rem] text-amtfar-primary font-bold tracking-widest uppercase">Ecosistema AMTFAR</p>
+      </div>
+    </div>
+    
+    <div class="flex-1 overflow-y-auto py-6 px-4 custom-scrollbar">
+      <nav class="space-y-1">
+        <a routerLink="/app/dashboard" routerLinkActive="bg-amtfar-primary text-white shadow-md shadow-amtfar-primary/20" 
+           class="flex items-center px-4 py-3.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-xl transition-all font-medium group">
+          <i class="fas fa-home w-6 text-center text-lg mr-2 group-hover:text-white transition-colors"></i>
+          Monitor Global
+        </a>
+        <a routerLink="/app/farmacias" routerLinkActive="bg-amtfar-primary text-white" 
+           class="flex items-center px-4 py-3.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-xl transition-all font-medium group">
+          <i class="fas fa-user-md w-6 text-center text-lg mr-2 group-hover:text-white transition-colors"></i>
+          Farmacias
+        </a>
+        <a routerLink="/app/padrones" routerLinkActive="bg-amtfar-primary text-white" 
+           class="flex items-center px-4 py-3.5 text-slate-300 hover:bg-slate-800 hover:text-white rounded-xl transition-all font-medium group">
+          <i class="fas fa-users w-6 text-center text-lg mr-2 group-hover:text-white transition-colors"></i>
+          Padrón Integral
+        </a>
+      </nav>
+    </div>
+    
+    <div class="p-6 border-t border-slate-800">
+      <button (click)="logout()" class="w-full flex items-center px-4 py-3 text-slate-400 hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all font-medium group">
+        <i class="fas fa-sign-out-alt w-6 text-center text-lg mr-2 group-hover:text-red-400"></i>
+        Cerrar Sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- Mobile Sidebar Overlay... -->
+  @if (isMobileMenuOpen) {
+  <div class="fixed inset-0 z-40 flex md:hidden">
+    <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm" (click)="toggleMenu()"></div>
+    <aside class="relative flex-1 flex flex-col max-w-xs w-full bg-slate-900 text-white animate-fade-in-right">
+      <div class="absolute top-0 right-0 -mr-12 pt-4">
+        <button (click)="toggleMenu()" class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+          <i class="fas fa-times text-white text-xl"></i>
+        </button>
+      </div>
+      <div class="h-20 flex px-6 items-center bg-slate-950">
+        <h1 class="text-xl font-bold">Resumen Web</h1>
+      </div>
+      <div class="flex-1 h-0 overflow-y-auto pt-5 pb-4 px-3">
+        <!-- Links repeticion del desktop -->
+        <a routerLink="/app/dashboard" (click)="toggleMenu()" class="flex items-center px-4 py-3 text-white bg-amtfar-primary rounded-xl mb-2">
+          Monitor Global
+        </a>
+      </div>
+    </aside>
+  </div>
+  }
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+    <!-- Navbar -->
+    <header class="bg-white h-20 shadow-sm border-b border-slate-100 flex items-center justify-between px-6 z-10 shrink-0">
+      <button class="md:hidden text-slate-500 h-10 w-10 hover:bg-slate-100 rounded-xl flex items-center justify-center transition-colors" (click)="toggleMenu()">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+      
+      <div class="hidden md:flex ml-4">
+        <div class="relative">
+          <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input type="text" placeholder="Buscar farmacias, cuils..." class="pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amtfar-primary/50 focus:border-amtfar-primary w-80 transition-shadow">
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-4 ml-auto">
+        <div class="flex items-center gap-3 bg-slate-50 py-1.5 px-2.5 rounded-full border border-slate-100">
+          <div class="w-9 h-9 bg-amtfar-primary/10 rounded-full flex items-center justify-center">
+            <i class="fas fa-user-shield text-amtfar-primary text-sm"></i>
+          </div>
+          <div class="flex flex-col pr-2">
+            <span class="text-sm font-bold text-slate-700 leading-tight">Auditoría FATFA</span>
+            <span class="text-[0.65rem] font-medium text-slate-500 uppercase tracking-wider">SuperAdmin</span>
+          </div>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Router Outlet con Scroll interno suave -->
+    <div class="flex-1 overflow-auto bg-slate-50 relative">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

@@ -33,7 +33,7 @@ class JwtAuthMiddleware
         } catch (\Firebase\JWT\ExpiredException $e) {
             return $this->unauthorizedResponse('El token ha expirado. Por favor, inicie sesión nuevamente.');
         } catch (\Exception $e) {
-            return $this->unauthorizedResponse('Token inválido o corrompido.');
+            return $this->unauthorizedResponse('Token inválido o corrompido. Detalle: ' . $e->getMessage());
         }
     }
 
